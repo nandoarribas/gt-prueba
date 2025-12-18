@@ -13,10 +13,12 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
     /// </remarks>
     /// <param name="repository">The vehicle repository to use for data access.</param>
     /// <param name="telemetry">The telemetry instance to detect executed actions.</param>
-    public class RentingManager(IVehicleRepository repository, ITelemetry telemetry)
+    /// <param name="logger">The logger instance to log actions.</param>
+    public class RentingManager(IVehicleRepository repository, ITelemetry telemetry, IAppLogger<RentingManager> logger)
     {
         private readonly IVehicleRepository _repository = repository;
         private readonly ITelemetry _telemetry = telemetry;
+        private readonly IAppLogger<RentingManager> _logger = logger;
 
         /// <summary>
         /// Adds a vehicle to the fleet if it is not older than 5 years.
@@ -29,9 +31,12 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 
+            _logger.LogInformation("Attempting to add vehicle {VehicleId} to the fleet.", vehicle.Id);
+
             var currentYear = DateTime.UtcNow.Year;
             if ((currentYear - vehicle.FabricationYear) > 5)
             {
+                _logger.LogWarning("Vehicle {VehicleId} rejected: Too old ({Year}).", vehicle.Id, vehicle.FabricationYear);
                 _telemetry.TrackEvent("AddVehicleToFleetFailed", new System.Collections.Generic.Dictionary<string, string>
                 {
                     { "Reason", "VehicleTooOld" },
@@ -42,6 +47,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
             }
 
             await _repository.CreateAsync(vehicle);
+            _logger.LogInformation("Vehicle {VehicleId} successfully added.", vehicle.Id);
             _telemetry.TrackEvent("AddVehicleToFleetSuccess", new System.Collections.Generic.Dictionary<string, string>
             {
                 { "VehicleId", vehicle.Id }
@@ -60,8 +66,11 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
         /// </returns>
         public async Task<string> RentVehicle(string vehicleId, string clientId)
         {
+            _logger.LogInformation("Processing rental request for Vehicle: {VehicleId} by Person: {clientId}.", vehicleId, clientId); 
+
             if (await _repository.HasActiveRentAsync(clientId))
             {
+                _logger.LogWarning("Rental denied: Person {clientId} already rented a vehicle.", clientId);
                 _telemetry.TrackEvent("RentVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
                 {
                     { "Reason", "ActiveRentalExists" },
@@ -88,6 +97,8 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
                 { "VehicleId", vehicleId },
                 { "ClientId", clientId }
             });
+
+            _logger.LogInformation("Rental completed for {VehicleId}.", vehicleId);
             return "Rental successful.";
         }
 
@@ -101,6 +112,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
             {
                 vehicle.CurrentClientID = null;
                 await _repository.UpdateAsync(vehicle);
+                _logger.LogInformation("Released vehicle {VehicleId}.", vehicleId);
             }
         }
     }
