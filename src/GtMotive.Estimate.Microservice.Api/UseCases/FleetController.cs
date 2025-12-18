@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl;
+using GtMotive.Estimate.Microservice.Domain;
 using GtMotive.Estimate.Microservice.Domain.Entities;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,18 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         /// vehicle is added successfully; otherwise, returns <see cref="BadRequestObjectResult"/> with an error message
         /// if the vehicle's age exceeds 5 years.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create(Vehicle v) => await manager.AddVehicleToFleet(v) ? Ok() : BadRequest("Vehicle age exceeds 5 years.");
+        public async Task<IActionResult> Create(Vehicle v)
+        {
+            try
+            {
+                await manager.AddVehicleToFleet(v);
+                return Ok();
+            }
+            catch (DomainException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         /// <summary>
         /// Initiates the rental process for a specified vehicle by a specified person.
@@ -50,8 +62,15 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         [HttpPost("rent")]
         public async Task<IActionResult> Rent(string vehicleId, string clientId)
         {
-            var result = await manager.RentVehicle(vehicleId, clientId);
-            return result.Contains("successful", System.StringComparison.OrdinalIgnoreCase) ? Ok(result) : BadRequest(result);
+            try
+            {
+                await manager.RentVehicle(vehicleId, clientId);
+                return Ok("Rental successful");
+            }
+            catch (DomainException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /// <summary>
@@ -62,8 +81,15 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         [HttpPost("return/{id}")]
         public async Task<IActionResult> Return(string id)
         {
-            await manager.ReturnVehicle(id);
-            return Ok();
+            try
+            {
+                await manager.ReturnVehicle(id);
+                return Ok();
+            }
+            catch (DomainException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

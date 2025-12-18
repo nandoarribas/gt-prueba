@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using GtMotive.Estimate.Microservice.Domain;
 using GtMotive.Estimate.Microservice.Domain.Entities;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
 
@@ -25,9 +26,9 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
         /// </summary>
         /// <param name="vehicle">Vehicle to add.</param>
         /// <returns>
-        /// <c>true</c> if add was ok. otherwise, <c>false</c> if vehicle older than 5 years.
+        /// A <see cref="Task"/> represents async operation with the result of the rental process.
         /// </returns>
-        public async Task<bool> AddVehicleToFleet(Vehicle vehicle)
+        public async Task AddVehicleToFleet(Vehicle vehicle)
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 
@@ -43,7 +44,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
                     { "FabricationYear", vehicle.FabricationYear.ToString(System.Globalization.CultureInfo.InvariantCulture) },
                     { "CurrentYear", currentYear.ToString(System.Globalization.CultureInfo.InvariantCulture) }
                 });
-                return false;
+                throw new DomainException($"Cannot add vehicle {vehicle.Id}. Fabrication year {vehicle.FabricationYear} exceeds the 5-year limit.");
             }
 
             await _repository.CreateAsync(vehicle);
@@ -52,21 +53,17 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
             {
                 { "VehicleId", vehicle.Id }
             });
-            return true;
         }
 
         /// <summary>Processes a rental request validating business constraints.</summary>
         /// <param name="vehicleId">Vehicle Identifier.</param>
         /// <param name="clientId">Client identifier.</param>
         /// <returns>
-        /// A message indicating result
-        /// "This person already has an active rental.",
-        /// "Vehicle not found or not available." ,
-        /// or "Rental successful." if process was ok.
+        /// A <see cref="Task"/> represents async operation with the result of the rental process.
         /// </returns>
-        public async Task<string> RentVehicle(string vehicleId, string clientId)
+        public async Task RentVehicle(string vehicleId, string clientId)
         {
-            _logger.LogInformation("Processing rental request for Vehicle: {VehicleId} by Person: {clientId}.", vehicleId, clientId); 
+            _logger.LogInformation("Processing rental request for Vehicle: {VehicleId} by Person: {clientId}.", vehicleId, clientId);
 
             if (await _repository.HasActiveRentAsync(clientId))
             {
@@ -76,18 +73,30 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
                     { "Reason", "ActiveRentalExists" },
                     { "ClientId", clientId }
                 });
-                return "This person already has an active rental.";
+                throw new DomainException($"The person {clientId} already has an active rental.");
             }
 
             var vehicle = await _repository.GetByIdAsync(vehicleId);
-            if (vehicle == null || !vehicle.IsAvailable)
+            if (vehicle == null)
             {
+                _logger.LogWarning("Rental failed: Vehicle {VehicleId} does not exists.", vehicleId);
                 _telemetry.TrackEvent("RentVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
                 {
-                    { "Reason", "VehicleNotFoundOrUnavailable" },
+                    { "Reason", "VehicleNotFound" },
                     { "VehicleId", vehicleId }
                 });
-                return "Vehicle not found or not available.";
+                throw new DomainException("The requested vehicle does not exist.");
+            }
+
+            if (!vehicle.IsAvailable)
+            {
+                _logger.LogWarning("Rental denied: Vehicle {VehicleId} is not available.", vehicleId);
+                _telemetry.TrackEvent("RentVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
+                {
+                    { "Reason", "VehicleNotAvailable" },
+                    { "VehicleId", vehicleId }
+                });
+                throw new DomainException("The requested vehicle is not available for rent.");
             }
 
             vehicle.CurrentClientID = clientId;
@@ -99,7 +108,6 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
             });
 
             _logger.LogInformation("Rental completed for {VehicleId}.", vehicleId);
-            return "Rental successful.";
         }
 
         /// <summary>Processes the return of a vehicle.</summary>
@@ -108,12 +116,31 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
         public async Task ReturnVehicle(string vehicleId)
         {
             var vehicle = await _repository.GetByIdAsync(vehicleId);
-            if (vehicle != null)
+            if (vehicle == null)
             {
-                vehicle.CurrentClientID = null;
-                await _repository.UpdateAsync(vehicle);
-                _logger.LogInformation("Released vehicle {VehicleId}.", vehicleId);
+                _logger.LogWarning("Return failed: Vehicle {VehicleId} does not exists.", vehicleId);
+                _telemetry.TrackEvent("ReturnVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
+                {
+                    { "Reason", "VehicleNotFound" },
+                    { "VehicleId", vehicleId }
+                });
+                throw new DomainException($"Vehicle with ID {vehicleId} was not found.");
             }
+
+            if (vehicle.IsAvailable)
+            {
+                _logger.LogWarning("Return attempted for vehicle {Id} which is already available.", vehicleId);
+                _telemetry.TrackEvent("ReturnVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
+                {
+                    { "Reason", "VehicleNotRented" },
+                    { "VehicleId", vehicleId }
+                });
+                throw new DomainException($"Vehicle {vehicleId} is not currently rented.");
+            }
+
+            vehicle.CurrentClientID = null;
+            await _repository.UpdateAsync(vehicle);
+            _logger.LogInformation("Released vehicle {VehicleId}.", vehicleId);
         }
     }
 }
