@@ -11,6 +11,9 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb
     /// </summary>
     public class VehicleRepository : IVehicleRepository
     {
+        /// <summary>
+        /// Important. Use a static list in memory to simulate persistence across different instances.
+        /// </summary>
         private static readonly List<Vehicle> _data = [];
 
         public async Task CreateAsync(Vehicle vehicle)

@@ -91,6 +91,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddRentingServices();
 builder.Services.AddSwagger(appSettings, builder.Configuration);
 
 var app = builder.Build();
