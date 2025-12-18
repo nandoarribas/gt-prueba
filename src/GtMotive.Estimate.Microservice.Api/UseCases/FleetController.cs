@@ -42,15 +42,15 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         /// <summary>
         /// Initiates the rental process for a specified vehicle by a specified person.
         /// </summary>
-        /// <param name="vehicleId">The unique identifier of the vehicle to be rented. Cannot be null or empty.</param>
-        /// <param name="personId">The unique identifier of the person renting the vehicle. Cannot be null or empty.</param>
+        /// <param name="vehicleId">The vehicle ID to be rented. Cannot be null or empty.</param>
+        /// <param name="clientId">The client ID renting the vehicle. Cannot be null or empty.</param>
         /// <returns>An <see cref="IActionResult"/> indicating the result of the rental operation. Returns <see
         /// cref="OkObjectResult"/> if the rental is successful; otherwise, returns <see cref="BadRequestObjectResult"/>
         /// with details of the failure.</returns>
         [HttpPost("rent")]
-        public async Task<IActionResult> Rent(string vehicleId, string personId)
+        public async Task<IActionResult> Rent(string vehicleId, string clientId)
         {
-            var result = await manager.RentVehicle(vehicleId, personId);
+            var result = await manager.RentVehicle(vehicleId, clientId);
             return result.Contains("successful", System.StringComparison.OrdinalIgnoreCase) ? Ok(result) : BadRequest(result);
         }
 
