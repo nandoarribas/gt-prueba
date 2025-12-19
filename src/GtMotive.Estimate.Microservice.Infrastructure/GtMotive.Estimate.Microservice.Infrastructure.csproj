@@ -12,10 +12,13 @@
         <PackageReference Include="MongoDB.Bson" />
         <PackageReference Include="MongoDB.Driver" />
         <PackageReference Include="Polly" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\GtMotive.Estimate.Microservice.ApplicationCore\GtMotive.Estimate.Microservice.ApplicationCore.csproj" />
+        
     </ItemGroup>
 
 </Project>
