@@ -37,7 +37,6 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
             var currentYear = DateTime.UtcNow.Year;
             if ((currentYear - vehicle.FabricationYear) > 5)
             {
-                _logger.LogWarning("Vehicle {VehicleId} rejected: Too old ({Year}).", vehicle.Id, vehicle.FabricationYear);
                 _telemetry.TrackEvent("AddVehicleToFleetFailed", new System.Collections.Generic.Dictionary<string, string>
                 {
                     { "Reason", "VehicleTooOld" },
@@ -67,7 +66,6 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
 
             if (await _repository.HasActiveRentAsync(clientId))
             {
-                _logger.LogWarning("Rental denied: Person {clientId} already rented a vehicle.", clientId);
                 _telemetry.TrackEvent("RentVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
                 {
                     { "Reason", "ActiveRentalExists" },
@@ -79,7 +77,6 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
             var vehicle = await _repository.GetByIdAsync(vehicleId);
             if (vehicle == null)
             {
-                _logger.LogWarning("Rental failed: Vehicle {VehicleId} does not exists.", vehicleId);
                 _telemetry.TrackEvent("RentVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
                 {
                     { "Reason", "VehicleNotFound" },
@@ -90,7 +87,6 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
 
             if (!vehicle.IsAvailable)
             {
-                _logger.LogWarning("Rental denied: Vehicle {VehicleId} is not available.", vehicleId);
                 _telemetry.TrackEvent("RentVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
                 {
                     { "Reason", "VehicleNotAvailable" },
@@ -118,7 +114,6 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
             var vehicle = await _repository.GetByIdAsync(vehicleId);
             if (vehicle == null)
             {
-                _logger.LogWarning("Return failed: Vehicle {VehicleId} does not exists.", vehicleId);
                 _telemetry.TrackEvent("ReturnVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
                 {
                     { "Reason", "VehicleNotFound" },
@@ -129,7 +124,6 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
 
             if (vehicle.IsAvailable)
             {
-                _logger.LogWarning("Return attempted for vehicle {Id} which is already available.", vehicleId);
                 _telemetry.TrackEvent("ReturnVehicleFailed", new System.Collections.Generic.Dictionary<string, string>
                 {
                     { "Reason", "VehicleNotRented" },

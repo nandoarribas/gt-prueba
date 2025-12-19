@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl;
-using GtMotive.Estimate.Microservice.Domain;
 using GtMotive.Estimate.Microservice.Domain.Entities;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -40,15 +39,8 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         [HttpPost]
         public async Task<IActionResult> Create(Vehicle v)
         {
-            try
-            {
-                await manager.AddVehicleToFleet(v);
-                return Ok();
-            }
-            catch (DomainException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await manager.AddVehicleToFleet(v);
+            return Ok();
         }
 
         /// <summary>
@@ -62,15 +54,8 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         [HttpPost("rent")]
         public async Task<IActionResult> Rent(string vehicleId, string clientId)
         {
-            try
-            {
-                await manager.RentVehicle(vehicleId, clientId);
-                return Ok("Rental successful");
-            }
-            catch (DomainException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await manager.RentVehicle(vehicleId, clientId);
+            return Ok("Rental successful");
         }
 
         /// <summary>
@@ -81,15 +66,8 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         [HttpPost("return/{id}")]
         public async Task<IActionResult> Return(string id)
         {
-            try
-            {
-                await manager.ReturnVehicle(id);
-                return Ok();
-            }
-            catch (DomainException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await manager.ReturnVehicle(id);
+            return Ok();
         }
     }
 }
