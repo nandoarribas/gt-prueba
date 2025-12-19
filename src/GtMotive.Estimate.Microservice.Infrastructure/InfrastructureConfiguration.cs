@@ -17,7 +17,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure
             this IServiceCollection services,
             bool isDevelopment)
         {
-            services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
+            services.AddSingleton(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
 
             if (!isDevelopment)
             {
