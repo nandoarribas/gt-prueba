@@ -30,7 +30,6 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         public async Task<IActionResult> GetAvailable()
         {
             var result = await _mediator.Send(new GetAvailableVehiclesQuery());
-
             return Ok(result);
         }
 

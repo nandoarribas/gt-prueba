@@ -27,8 +27,8 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 
-            _context.Vehicles.Add(vehicle);
-            await Task.CompletedTask;
+            await _context.Vehicles.AddAsync(vehicle);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Vehicle>> GetAllAsync()
@@ -49,7 +49,7 @@ namespace GtMotive.Estimate.Microservice.Infrastructure.MongoDb
         public async Task UpdateAsync(Vehicle vehicle)
         {
             ArgumentNullException.ThrowIfNull(vehicle);
-
+            await _context.SaveChangesAsync();
             await Task.CompletedTask;
         }
     }

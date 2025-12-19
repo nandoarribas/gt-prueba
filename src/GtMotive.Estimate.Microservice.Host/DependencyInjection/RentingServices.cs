@@ -14,8 +14,7 @@ namespace GtMotive.Estimate.Microservice.Host.DependencyInjection
             services.AddDbContext<VehicleDbContext>(options =>
                 options.UseInMemoryDatabase("FleetDatabase"));
 
-            // Singleton for the mock repository to persist data in memory during runtime
-            services.AddSingleton<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
             services.AddScoped<RentingManager>();
             return services;
         }
