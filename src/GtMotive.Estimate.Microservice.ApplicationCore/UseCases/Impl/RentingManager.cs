@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.Domain;
-using GtMotive.Estimate.Microservice.Domain.Entities;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
+using VehicleR = GtMotive.Estimate.Microservice.Domain.Entities.Vehicle;
 
 namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
 {
@@ -28,7 +28,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
         /// <returns>
         /// A <see cref="Task"/> represents async operation with the result of the rental process.
         /// </returns>
-        public async Task AddVehicleToFleet(Vehicle vehicle)
+        public async Task AddVehicleToFleet(VehicleR vehicle)
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 

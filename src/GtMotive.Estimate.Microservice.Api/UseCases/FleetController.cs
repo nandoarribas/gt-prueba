@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Command;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Queries;
 using GtMotive.Estimate.Microservice.Domain.Entities;
-using GtMotive.Estimate.Microservice.Domain.Interfaces;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GtMotive.Estimate.Microservice.Api.UseCases
@@ -10,63 +12,80 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
     /// <summary>
     /// API Controller for renting management.
     /// </summary>
-    /// <remarks>
-    /// Initializes a new instance of the <see cref="FleetController"/> class.
-    /// </remarks>
-    /// <param name="manager">Renting manager instance.</param>
-    /// <param name="repo">VehicleRepository instance.</param>
     [ApiController]
     [Route("api/[controller]")]
-    public class FleetController(RentingManager manager, IVehicleRepository repo) : ControllerBase
+    public class FleetController(IMediator mediator) : ControllerBase
     {
-        /// <summary>
-        /// Retrieves all available items.
-        /// </summary>
-        /// <returns>An <see cref="IActionResult"/> containing a collection of items that are currently available. The collection
-        /// is empty if no items are available.</returns>
-        [HttpGet]
-        public async Task<IActionResult> GetAvailable() => Ok((await repo.GetAllAsync()).Where(v => v.IsAvailable));
+        private readonly IMediator _mediator = mediator;
 
         /// <summary>
-        /// Adds a new vehicle to the fleet.
+        /// Retrieves a list of all available vehicles for rent.
         /// </summary>
-        /// <remarks>This action is typically invoked via an HTTP POST request. The request body should
-        /// contain the vehicle details to be added.</remarks>
-        /// <param name="v">The <see cref="Vehicle"/> to add to the fleet. The vehicle's age must not exceed 5 years.</param>
-        /// <returns>An <see cref="IActionResult"/> indicating the result of the operation. Returns <see cref="OkResult"/> if the
-        /// vehicle is added successfully; otherwise, returns <see cref="BadRequestObjectResult"/> with an error message
-        /// if the vehicle's age exceeds 5 years.</returns>
-        [HttpPost]
-        public async Task<IActionResult> Create(Vehicle v)
+        /// <returns>A collection of available vehicles.</returns>
+        /// <response code="200">Returns the list of available vehicles.</response>
+        /// <response code="500">If an unexpected internal error occurs.</response>
+        [HttpGet("available")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Vehicle>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<IActionResult> GetAvailable()
         {
-            await manager.AddVehicleToFleet(v);
+            var result = await _mediator.Send(new GetAvailableVehiclesQuery());
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Processes a request to create a vehicle.
+        /// </summary>
+        /// <param name="command">The cretion request with valid data.</param>
+        /// <returns>A success message if the rental was processed correctly.</returns>
+        /// <response code="200">Returns a success message when the vehicle is successfully created.</response>
+        /// <response code="400">If the business rules are violated (e.g., vehicle exists or vehicle too old).</response>
+        /// <response code="500">If an unexpected internal error occurs.</response>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<IActionResult> Create([FromBody] CreateVehicleCommand command)
+        {
+            await _mediator.Send(command);
             return Ok();
         }
 
         /// <summary>
-        /// Initiates the rental process for a specified vehicle by a specified person.
+        /// Processes a request to rent a vehicle.
         /// </summary>
-        /// <param name="vehicleId">The vehicle ID to be rented. Cannot be null or empty.</param>
-        /// <param name="clientId">The client ID renting the vehicle. Cannot be null or empty.</param>
-        /// <returns>An <see cref="IActionResult"/> indicating the result of the rental operation. Returns <see
-        /// cref="OkObjectResult"/> if the rental is successful; otherwise, returns <see cref="BadRequestObjectResult"/>
-        /// with details of the failure.</returns>
+        /// <param name="command">The rental request details containing Vehicle ID and Client ID.</param>
+        /// <returns>A success message if the rental was processed correctly.</returns>
+        /// <response code="200">Returns a success message when the vehicle is successfully assigned.</response>
+        /// <response code="400">If the business rules are violated (e.g., vehicle unavailable or client already has a rental).</response>
+        /// <response code="500">If an unexpected internal error occurs.</response>
         [HttpPost("rent")]
-        public async Task<IActionResult> Rent(string vehicleId, string clientId)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<IActionResult> Rent([FromBody] RentVehicleCommand command)
         {
-            await manager.RentVehicle(vehicleId, clientId);
-            return Ok("Rental successful");
+            await _mediator.Send(command);
+
+            return Ok(new { Message = "Rental successful" });
         }
 
         /// <summary>
         /// Processes the return of a rented vehicle with the specified identifier.
         /// </summary>
-        /// <param name="id">The unique identifier of the vehicle to be returned. Cannot be null or empty.</param>
-        /// <returns>An <see cref="IActionResult"/> indicating the result of the operation.</returns>
-        [HttpPost("return/{id}")]
-        public async Task<IActionResult> Return(string id)
+        /// <param name="command">The return request details containing Vehicle ID and Client ID.</param>
+        /// <returns>A success message if the return was processed correctly.</returns>
+        /// <response code="200">Returns a success message when the vehicle is successfully returned.</response>
+        /// <response code="400">Returned if the vehicle is not found or is not currently rented (Business Rule Violation).</response>
+        /// <response code="500">Returned if an unexpected technical error occurs.</response> [HttpPost("return/{id}")]
+        [HttpPost("return")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<IActionResult> Return([FromBody] ReturnVehicleCommand command)
         {
-            await manager.ReturnVehicle(id);
+            await _mediator.Send(command);
             return Ok();
         }
     }
