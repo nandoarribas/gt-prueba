@@ -10,9 +10,9 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Comman
     /// Process return vehicle action.
     /// </summary>
     /// <param name="rentingManager">Service used to manage business logic.</param>
-    public class ReturnVehicleHandler(RentingManager rentingManager) : IRequestHandler<ReturnVehicleCommand>
+    public class ReturnVehicleHandler(IRentingManager rentingManager) : IRequestHandler<ReturnVehicleCommand>
     {
-        private readonly RentingManager _rentingManager = rentingManager;
+        private readonly IRentingManager _rentingManager = rentingManager;
 
         /// <summary>
         /// Handles the execution of the <see cref="ReturnVehicleCommand"/> to process a vehicle return.

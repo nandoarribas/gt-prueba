@@ -15,7 +15,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
     /// <param name="repository">The vehicle repository to use for data access.</param>
     /// <param name="telemetry">The telemetry instance to detect executed actions.</param>
     /// <param name="logger">The logger instance to log actions.</param>
-    public class RentingManager(IVehicleRepository repository, ITelemetry telemetry, IAppLogger<RentingManager> logger)
+    public class RentingManager(IVehicleRepository repository, ITelemetry telemetry, IAppLogger<RentingManager> logger) : IRentingManager
     {
         private readonly IVehicleRepository _repository = repository;
         private readonly ITelemetry _telemetry = telemetry;

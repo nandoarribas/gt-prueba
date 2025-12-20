@@ -11,9 +11,9 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Comman
     /// Process create vehicle action.
     /// </summary>
     /// <param name="rentingManager">Service used to manage business logic.</param>
-    public class CreateVehicleHandler(RentingManager rentingManager) : IRequestHandler<CreateVehicleCommand>
+    public class CreateVehicleHandler(IRentingManager rentingManager) : IRequestHandler<CreateVehicleCommand>
     {
-        private readonly RentingManager _rentingManager = rentingManager;
+        private readonly IRentingManager _rentingManager = rentingManager;
 
         /// <summary>
         /// Handles the execution of the <see cref="CreateVehicleCommand"/> to process a vehicle creation.
