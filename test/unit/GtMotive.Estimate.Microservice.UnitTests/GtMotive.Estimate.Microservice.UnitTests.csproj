@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
+   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -24,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="Api\" />
-    <Folder Include="ApplicationCore\" />
     <Folder Include="Infrastructure\" />
   </ItemGroup>
 
