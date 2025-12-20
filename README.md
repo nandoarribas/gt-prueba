@@ -40,3 +40,4 @@ Uso del patron mediatR
     handlers para gestionar las peticiones.
     Como se puede observar hemos dividido las llamadas de consulta (Queries) de las acciones post (Commands) para mantener el patrón CQRS, del principio de segregación 
     de responsabilidad entre consultas y comandos
+Se elimina de swaggerExtensions el uso de OpenApi
