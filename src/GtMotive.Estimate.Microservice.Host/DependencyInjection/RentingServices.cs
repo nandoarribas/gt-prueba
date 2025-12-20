@@ -15,7 +15,7 @@ namespace GtMotive.Estimate.Microservice.Host.DependencyInjection
                 options.UseInMemoryDatabase("FleetDatabase"));
 
             services.AddScoped<IVehicleRepository, VehicleRepository>();
-            services.AddScoped<RentingManager>();
+            services.AddScoped<IRentingManager, RentingManager>();
             return services;
         }
     }
