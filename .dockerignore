@@ -1,0 +1,17 @@
+# Ignore everything first
+**
+
+# Allow the src folder and its content
+!src/**
+
+# Allow the solution file if you have one
+!*.sln
+
+# Specifically block the problematic global.json
+global.json
+
+# Ignore build artifacts that might be on your Windows machine
+**/bin/
+**/obj/
+.vs/
+.git/

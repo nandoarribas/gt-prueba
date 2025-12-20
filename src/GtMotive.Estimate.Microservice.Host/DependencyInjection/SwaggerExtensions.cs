@@ -93,7 +93,6 @@ namespace GtMotive.Estimate.Microservice.Host.DependencyInjection
             {
                 if (!pathBase.IsDefault)
                 {
-                    options.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0;
                     options.RouteTemplate = "swagger/{documentName}/swagger.json";
                     options.PreSerializeFilters.Add((document, request) =>
                     {

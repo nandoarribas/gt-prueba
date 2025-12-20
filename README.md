@@ -40,4 +40,12 @@ Uso del patron mediatR
     handlers para gestionar las peticiones.
     Como se puede observar hemos dividido las llamadas de consulta (Queries) de las acciones post (Commands) para mantener el patrón CQRS, del principio de segregación 
     de responsabilidad entre consultas y comandos
-Se elimina de swaggerExtensions el uso de OpenApi
+
+Para el logger, podríamos haber hecho uso de Azure applicationInsights, pero para hacerlo correr rápido y sin dependencias lo dejamos tal y como lo hemos puesto, tampoco tenemos suscripción de azure para probarlo
+Como inicialmente tomamos la decisión también de cambiar el telemetry para pintar por logs, conseguimos que el proyecto sea independiente y se pueda ejecutar sin dependencias externas
+
+Decisiones técnicas
+Uso de Development al crear la imagen de docker: 
+Se realiza este cambio para evitar que el código de errores en el futuro y para que sea más fácil llevar a cabo la trazabilidad (logs y derivados...)
+Se elimina de swagger el uso de OpenApiVersion porque SwashBuckle en la versión usada no necesita indicar
+de manera explícita ese parámetro, ya que lo maneja internamente.
