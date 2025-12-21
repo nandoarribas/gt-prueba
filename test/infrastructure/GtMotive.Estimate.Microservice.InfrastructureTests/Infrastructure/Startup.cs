@@ -2,9 +2,14 @@
 using Acheve.AspNetCore.TestHost.Security;
 using Acheve.TestHost;
 using GtMotive.Estimate.Microservice.Api;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl;
+using GtMotive.Estimate.Microservice.Domain.Interfaces;
 using GtMotive.Estimate.Microservice.Infrastructure;
+using GtMotive.Estimate.Microservice.Infrastructure.Data;
+using GtMotive.Estimate.Microservice.Infrastructure.MongoDb;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -43,6 +48,10 @@ namespace GtMotive.Estimate.Microservice.InfrastructureTests.Infrastructure
                 .WithApiControllers();
 
             services.AddBaseInfrastructure(true);
+            services.AddDbContext<VehicleDbContext>(options => options.UseInMemoryDatabase("FleetDatabase"));
+
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IRentingManager, RentingManager>();
         }
     }
 }
