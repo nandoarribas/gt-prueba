@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
-using GtMotive.Estimate.Microservice.Domain.Entities;
 using GtMotive.Estimate.Microservice.Infrastructure.Data;
 using GtMotive.Estimate.Microservice.Infrastructure.MongoDb;
 using Microsoft.EntityFrameworkCore;

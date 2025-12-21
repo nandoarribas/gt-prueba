@@ -5,5 +5,5 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Comman
     /// <summary>
     /// DTO for renting a vehicle.
     /// </summary>
-    public record RentVehicleCommand(string VehicleId, string ClientId) : IRequest;
+    public record RentVehicleCommand(string VehicleId, string ClientId) : IRequest<Unit>;
 }

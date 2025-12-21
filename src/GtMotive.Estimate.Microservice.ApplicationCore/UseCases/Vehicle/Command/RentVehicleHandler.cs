@@ -10,7 +10,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Comman
     /// Process renting vehicle action.
     /// </summary>
     /// <param name="rentingManager">Service used to manage business logic.</param>
-    public class RentVehicleHandler(IRentingManager rentingManager) : IRequestHandler<RentVehicleCommand>
+    public class RentVehicleHandler(IRentingManager rentingManager) : IRequestHandler<RentVehicleCommand, Unit>
     {
         private readonly IRentingManager _rentingManager = rentingManager;
 
@@ -21,11 +21,13 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Comman
         /// <param name="cancellationToken">A cancellation token that can be used to request cancellation of the operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the <paramref name="request"/> is null.</exception>  public async Task Handle(RentVehicleCommand request, CancellationToken cancellationToken)
-        public async Task Handle(RentVehicleCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(RentVehicleCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
             await _rentingManager.RentVehicle(request.VehicleId, request.ClientId);
+
+            return Unit.Value;
         }
     }
 }

@@ -2,8 +2,13 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.Api;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl;
+using GtMotive.Estimate.Microservice.Domain.Interfaces;
 using GtMotive.Estimate.Microservice.Infrastructure;
+using GtMotive.Estimate.Microservice.Infrastructure.Data;
+using GtMotive.Estimate.Microservice.Infrastructure.MongoDb;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -12,7 +17,7 @@ using Xunit;
 
 namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
 {
-    internal sealed class CompositionRootTestFixture : IDisposable, IAsyncLifetime
+    public sealed class CompositionRootTestFixture : IDisposable, IAsyncLifetime
     {
         private readonly ServiceProvider _serviceProvider;
 
@@ -93,6 +98,12 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
         {
             services.AddApiDependencies();
             services.AddLogging();
+
+            services.AddDbContext<VehicleDbContext>(options =>
+                options.UseInMemoryDatabase("FleetDatabase"));
+
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IRentingManager, RentingManager>();
             services.AddBaseInfrastructure(true);
         }
     }

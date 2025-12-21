@@ -48,7 +48,8 @@ namespace GtMotive.Estimate.Microservice.InfrastructureTests.Infrastructure
                 .WithApiControllers();
 
             services.AddBaseInfrastructure(true);
-            services.AddDbContext<VehicleDbContext>(options => options.UseInMemoryDatabase("FleetDatabase"));
+            services.AddDbContext<VehicleDbContext>(options =>
+               options.UseInMemoryDatabase("FleetDatabase"));
 
             services.AddScoped<IVehicleRepository, VehicleRepository>();
             services.AddScoped<IRentingManager, RentingManager>();
