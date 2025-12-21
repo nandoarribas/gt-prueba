@@ -57,7 +57,6 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Infrastructure
             using var context = new VehicleDbContext(_options);
             var sut = new VehicleRepository(context);
 
-            // Act
             var result = await Assert.ThrowsAsync<ArgumentNullException>(async () => await sut.CreateAsync(null));
 
             // Assert
@@ -72,14 +71,19 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Infrastructure
             var vehicleId = "V99";
             var expectedVehicle = new Vehicle { Id = vehicleId, FabricationYear = 2023 };
 
-            using var context = new VehicleDbContext(_options);
-            var sut = new VehicleRepository(context);
+            using (var context = new VehicleDbContext(_options))
+            {
+                var sut = new VehicleRepository(context);
 
-            // Act
-            await sut.CreateAsync(expectedVehicle);
+                // Act
+                await sut.CreateAsync(expectedVehicle);
+            }
 
             // Assert
-            context.Vehicles.Should().Contain(v => v.Id == vehicleId);
+            using (var context = new VehicleDbContext(_options))
+            {
+                context.Vehicles.Should().Contain(v => v.Id == "V99");
+            }
         }
     }
 }
