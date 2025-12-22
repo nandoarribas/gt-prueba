@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Command;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.DTO;
 using GtMotive.Estimate.Microservice.Domain.Entities;
 using GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure;
 using GtMotive.Estimate.Microservice.Infrastructure.Data;
@@ -14,20 +15,23 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Specs
         [Fact]
         public async Task Rent_Vehicle_Should_Update_Database_Correctly()
         {
+            // Arrange
             var vehicleId = "V99";
             var clientId = "C123";
-
-            // Arrange
             await Seed(vehicleId);
             var command = new RentVehicleCommand(vehicleId, clientId);
+            VehicleDto result = null;
 
             // Act
-            await Fixture.UsingHandlerForRequest<RentVehicleCommand>(async handler =>
+            await Fixture.UsingHandlerForRequestResponse<RentVehicleCommand, VehicleDto>(async sut =>
             {
-                await handler.Handle(command, default);
+                result = await sut.Handle(command, default);
             });
 
             // Assert
+            result.Should().NotBeNull();
+            result.CurrentClientId.Should().Be(clientId);
+            result.IsRented.Should().BeTrue();
             await Fixture.UsingRepository<VehicleDbContext>(async context =>
             {
                 var dbVehicle = await context.Vehicles.FindAsync(vehicleId);

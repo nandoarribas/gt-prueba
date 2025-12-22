@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Command;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.DTO;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Queries;
 using GtMotive.Estimate.Microservice.Domain.Entities;
 using MediatR;
@@ -37,7 +38,7 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         /// Processes a request to create a vehicle.
         /// </summary>
         /// <param name="command">The cretion request with valid data.</param>
-        /// <returns>A success message if the rental was processed correctly.</returns>
+        /// <returns>A <see cref="VehicleDto"/> with the created vehicle and confirmation message.</returns>
         /// <response code="200">Returns a success message when the vehicle is successfully created.</response>
         /// <response code="400">If the business rules are violated (e.g., vehicle exists or vehicle too old).</response>
         /// <response code="500">If an unexpected internal error occurs.</response>
@@ -47,34 +48,34 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Create([FromBody] CreateVehicleCommand command)
         {
-            await _mediator.Send(command);
-            return Ok();
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
 
         /// <summary>
         /// Processes a request to rent a vehicle.
         /// </summary>
         /// <param name="command">The rental request details containing Vehicle ID and Client ID.</param>
-        /// <returns>A success message if the rental was processed correctly.</returns>
-        /// <response code="200">Returns a success message when the vehicle is successfully assigned.</response>
+        /// <returns>A <see cref="VehicleDto"/> with the updated rental state and confirmation message.</returns>
+        /// <response code="200">Returns the updated vehicle information and success message.</response>
         /// <response code="400">If the business rules are violated (e.g., vehicle unavailable or client already has a rental).</response>
         /// <response code="500">If an unexpected internal error occurs.</response>
         [HttpPost("rent")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(VehicleDto), StatusCodes.Status200OK)] // Añadimos el Type aquí
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Rent([FromBody] RentVehicleCommand command)
         {
-            await _mediator.Send(command);
+            var result = await _mediator.Send(command);
 
-            return Ok(new { Message = "Rental successful" });
+            return Ok(result);
         }
 
         /// <summary>
         /// Processes the return of a rented vehicle with the specified identifier.
         /// </summary>
         /// <param name="command">The return request details containing Vehicle ID and Client ID.</param>
-        /// <returns>A success message if the return was processed correctly.</returns>
+        /// <returns>A <see cref="VehicleDto"/> with the updated rental state and confirmation message.</returns>
         /// <response code="200">Returns a success message when the vehicle is successfully returned.</response>
         /// <response code="400">Returned if the vehicle is not found or is not currently rented (Business Rule Violation).</response>
         /// <response code="500">Returned if an unexpected technical error occurs.</response> [HttpPost("return/{id}")]
@@ -84,8 +85,8 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Return([FromBody] ReturnVehicleCommand command)
         {
-            await _mediator.Send(command);
-            return Ok();
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
     }
 }

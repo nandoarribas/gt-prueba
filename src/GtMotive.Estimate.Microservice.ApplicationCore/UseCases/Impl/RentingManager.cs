@@ -28,7 +28,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
         /// <returns>
         /// A <see cref="Task"/> represents async operation with the result of the rental process.
         /// </returns>
-        public async Task AddVehicleToFleet(VehicleR vehicle)
+        public async Task<VehicleR> AddVehicleToFleet(VehicleR vehicle)
         {
             ArgumentNullException.ThrowIfNull(vehicle);
 
@@ -52,15 +52,17 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
             {
                 { "VehicleId", vehicle.Id }
             });
+
+            return vehicle;
         }
 
         /// <summary>Processes a rental request validating business constraints.</summary>
         /// <param name="vehicleId">Vehicle Identifier.</param>
         /// <param name="clientId">Client identifier.</param>
         /// <returns>
-        /// A <see cref="Task"/> represents async operation with the result of the rental process.
+        /// A <see cref="Task"/> represents async operation with the result of the vehicleDto.
         /// </returns>
-        public async Task RentVehicle(string vehicleId, string clientId)
+        public async Task<VehicleR> RentVehicle(string vehicleId, string clientId)
         {
             _logger.LogInformation("Processing rental request for Vehicle: {VehicleId} by Person: {clientId}.", vehicleId, clientId);
 
@@ -102,14 +104,16 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
                 { "VehicleId", vehicleId },
                 { "ClientId", clientId }
             });
+            var messageOk = $"Rental completed for {vehicleId}.";
+            _logger.LogInformation(messageOk);
 
-            _logger.LogInformation("Rental completed for {VehicleId}.", vehicleId);
+            return vehicle;
         }
 
         /// <summary>Processes the return of a vehicle.</summary>
         /// <param name="vehicleId">Vehicle id to return.</param>
         /// <returns>An async task with return vehicle action.</returns>
-        public async Task ReturnVehicle(string vehicleId)
+        public async Task<VehicleR> ReturnVehicle(string vehicleId)
         {
             var vehicle = await _repository.GetByIdAsync(vehicleId);
             if (vehicle == null)
@@ -133,8 +137,10 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
             }
 
             vehicle.CurrentClientID = null;
+            var messageOk = $"Released vehicle {vehicleId}.";
             await _repository.UpdateAsync(vehicle);
-            _logger.LogInformation("Released vehicle {VehicleId}.", vehicleId);
+            _logger.LogInformation(messageOk);
+            return vehicle;
         }
     }
 }

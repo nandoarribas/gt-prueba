@@ -1,9 +1,10 @@
-﻿using MediatR;
+﻿using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.DTO;
+using MediatR;
 
 namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Command
 {
     /// <summary>
-    /// DTO for renting a vehicle.
+    /// Entry data for renting a vehicle.
     /// </summary>
-    public record RentVehicleCommand(string VehicleId, string ClientId) : IRequest<Unit>;
+    public record RentVehicleCommand(string VehicleId, string ClientId) : IRequest<VehicleDto>;
 }

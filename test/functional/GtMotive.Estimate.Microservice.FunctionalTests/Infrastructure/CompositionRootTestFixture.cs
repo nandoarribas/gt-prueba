@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.Api;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.DTO;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
 using GtMotive.Estimate.Microservice.Infrastructure;
 using GtMotive.Estimate.Microservice.Infrastructure.Data;
@@ -47,13 +48,13 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
             await Task.CompletedTask;
         }
 
-        public async Task UsingHandlerForRequest<TRequest>(Func<IRequestHandler<TRequest, Unit>, Task> handlerAction)
-            where TRequest : IRequest<Unit>
+        public async Task UsingHandlerForRequest<TRequest>(Func<IRequestHandler<TRequest, VehicleDto>, Task> handlerAction)
+            where TRequest : IRequest<VehicleDto>
         {
             ArgumentNullException.ThrowIfNull(handlerAction);
 
             using var scope = _serviceProvider.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<IRequestHandler<TRequest, Unit>>();
+            var handler = scope.ServiceProvider.GetRequiredService<IRequestHandler<TRequest, VehicleDto>>();
 
             await handlerAction.Invoke(handler);
         }

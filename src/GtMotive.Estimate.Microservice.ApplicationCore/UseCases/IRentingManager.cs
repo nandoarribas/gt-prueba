@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using VehicleR = GtMotive.Estimate.Microservice.Domain.Entities.Vehicle;
 
 namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
 {
@@ -14,7 +15,7 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
         /// <returns>
         /// A <see cref="Task"/> represents async operation with the result of the rental process.
         /// </returns>
-        Task AddVehicleToFleet(Domain.Entities.Vehicle vehicle);
+        Task<VehicleR> AddVehicleToFleet(VehicleR vehicle);
 
         /// <summary>Processes a rental request validating business constraints.</summary>
         /// <param name="vehicleId">Vehicle Identifier.</param>
@@ -22,11 +23,11 @@ namespace GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl
         /// <returns>
         /// A <see cref="Task"/> represents async operation with the result of the rental process.
         /// </returns>
-        Task RentVehicle(string vehicleId, string clientId);
+        Task<VehicleR> RentVehicle(string vehicleId, string clientId);
 
         /// <summary>Processes the return of a vehicle.</summary>
         /// <param name="vehicleId">Vehicle id to return.</param>
         /// <returns>An async task with return vehicle action.</returns>
-        Task ReturnVehicle(string vehicleId);
+        Task<VehicleR> ReturnVehicle(string vehicleId);
     }
 }
