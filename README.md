@@ -56,6 +56,7 @@ podamos devolver la información del object result de lo que se ha manipulado en
 Tests
 Se podrían haber creado muchos más tests (ejemplo en rentingMAnager las reglas citadas del enunciado de 5 años de antiguedad o vehiculo ya alquilado), pero 
 he dejado una pincelada de ejemplos de tests, tanto unitarios como infra
+Para los comentarios, siempre que los he creado los he creado con _ para distinguir la acción_condición_quéespera. Por eso lo he metido en el globalSuppressions
 En el caso de infra, se han movido tests unitarios a infra debido a que se utiliza lógica de creación y guardado en bbdd y en esta parte es donde se debería probarlo
 
 Para lanzar docker:

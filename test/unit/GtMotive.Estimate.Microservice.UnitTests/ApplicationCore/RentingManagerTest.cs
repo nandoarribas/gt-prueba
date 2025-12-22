@@ -77,7 +77,7 @@ namespace GtMotive.Estimate.Microservice.UnitTests.ApplicationCore
             _telemetryMock.Verify(t => t.TrackEvent("RentVehicleSuccess", It.IsAny<IDictionary<string, string>>(), It.IsAny<IDictionary<string, double>>()), Times.Once);
         }
 
-        private Vehicle CreateValidVehicle(string id) => new()
+        private static Vehicle CreateValidVehicle(string id) => new()
         {
             Id = id,
             FabricationYear = DateTime.Now.Year,
