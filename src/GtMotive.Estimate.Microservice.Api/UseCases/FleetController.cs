@@ -22,7 +22,7 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         /// <summary>
         /// Retrieves a list of all available vehicles for rent.
         /// </summary>
-        /// <returns>A collection of available vehicles.</returns>
+        /// <returns>A list of <see cref="Vehicle"/> representing the available vehicles.</returns>
         /// <response code="200">Returns the list of available vehicles.</response>
         /// <response code="500">If an unexpected internal error occurs.</response>
         [HttpGet("available")]

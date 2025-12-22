@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using GtMotive.Estimate.Microservice.Api.UseCases;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.Command;
+using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.DTO;
 using GtMotive.Estimate.Microservice.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -28,21 +29,10 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Api
         }
 
         [Fact]
-        public async Task Rent_ShouldReturnNoContent_WhenManagerSucceeds()
-        {
-            // Act
-            var result = await _sut.Rent(_rentCommandMock.Object);
-
-            // Assert
-            result.Should().BeOfType<OkObjectResult>();
-            _mediatorMock.Verify(m => m.Send(It.Is<RentVehicleCommand>(cmd => cmd.VehicleId == _vehicleId && cmd.ClientId == _clientId), It.IsAny<CancellationToken>()), Times.Once);
-        }
-
-        [Fact]
         public async Task Rent_ShouldReturnError_WhenDomainExceptionIsThrown()
         {
             // Arrange
-            var errorMessage = "El vehículo ya está alquilado.";
+            var errorMessage = "Vehicle already rented.";
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<RentVehicleCommand>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new DomainException(errorMessage));
@@ -52,6 +42,27 @@ namespace GtMotive.Estimate.Microservice.UnitTests.Api
 
             // Assert
             Assert.Equal(errorMessage, exceptionResult.Message);
+        }
+
+        [Fact]
+        public async Task Rent_ShouldReturnOk_WhenCommandSucceeds()
+        {
+            // Arrange
+            var command = new RentVehicleCommand("V1", "C1");
+            var expectedDto = new VehicleDto("V1", "C1", true, "Success");
+
+            _mediatorMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
+                         .ReturnsAsync(expectedDto);
+
+            // Act
+            var result = await _sut.Rent(command);
+
+            // Assert
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            var returnedDto = okResult.Value.Should().BeOfType<VehicleDto>().Subject;
+
+            returnedDto.VehicleId.Should().Be("V1");
+            returnedDto.Message.Should().Be("Success");
         }
     }
 }

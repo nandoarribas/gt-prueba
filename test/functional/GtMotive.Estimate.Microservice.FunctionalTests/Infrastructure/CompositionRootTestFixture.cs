@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using GtMotive.Estimate.Microservice.Api;
+using GtMotive.Estimate.Microservice.ApplicationCore.Mappings;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Impl;
 using GtMotive.Estimate.Microservice.ApplicationCore.UseCases.Vehicle.DTO;
 using GtMotive.Estimate.Microservice.Domain.Interfaces;
@@ -103,6 +104,7 @@ namespace GtMotive.Estimate.Microservice.FunctionalTests.Infrastructure
             services.AddDbContext<VehicleDbContext>(options =>
                 options.UseInMemoryDatabase("FleetDatabase"));
 
+            services.AddAutoMapper(typeof(VehicleProfile).Assembly);
             services.AddScoped<IVehicleRepository, VehicleRepository>();
             services.AddScoped<IRentingManager, RentingManager>();
             services.AddBaseInfrastructure(true);
