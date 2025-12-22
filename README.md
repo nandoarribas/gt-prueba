@@ -55,4 +55,4 @@ Swagger disponible en: http://localhost:8080/swagger
 
 ## Autor y Repo
 
-* Fernando Arribas Ramirez - [nandoarribas](https://github.com/nandoarribas/gt-prueba/
+* Fernando Arribas Ramirez - [nandoarribas](https://github.com/nandoarribas/gt-prueba/)
