@@ -1,66 +1,58 @@
-# gt-test
-Technical exercise for GT
-Cosas hechas
+# GT-Test: Microservicio de Gestion de Renting
 
-Describir el modelo, el repository, el controlador y las dependencias
+Este microservicio ha sido desarrollado como un ejercicio tecnico enfocado en un sistema de gestion de flota y alquiler de vehiculos bajo .NET 9.
 
-Describir el uso del telemetry y como poder probarlo
-Se ha declarado el telemetry para registrar los resultados de las llamadas a los endpoints
-Podríamos haber usado una bbdd y guardar las transacciones, pero hemos dejado por simplicidad el uso con consola
-Ejemplo, si hacemos una creación de vehiculo a la flota, y falla porque son mas de 5 años
-[TELEMETRY EVENT]: AddVehicleToFleetFailed
-  Prop: Reason = VehicleTooOld
-  Prop: FabricationYear = 2000
-  Prop: CurrentYear = 2025
-[11:16:41 Information] Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor
-Si el proceso es OK
-[TELEMETRY EVENT]: AddVehicleToFleetSuccess
-  Prop: VehicleId = C0001
-[11:19:04 Information] Microsoft.AspNetCore.Mvc.StatusCodeResult
-Executing StatusCodeResult, setting HTTP status code 200
+## Arquitectura y Patrones de Diseno
 
-Describir cómo declarar el swagger
+El proyecto se ha estructurado siguiendo los principios de **Clean Architecture** y el patron **CQRS** (Command Query Responsibility Segregation).
 
-Incluir el logging para complementar el telemetry
+* **MediatR:** Utilizado como mediador para desacoplar los controladores de la logica de aplicacion.
+* **Patron Handler:** Implementacion de handlers especificos para cada Command y Query.
+* **Persistencia en Memoria:** Uso de VehicleDbContext en memoria para permitir la ejecucion inmediata sin dependencias externas.
 
-Se ha incluido logging en los controladores para registrar eventos importantes y errores.
+## Logica de Negocio y Reglas de Dominio
 
-Se va a hacer uso de DomainException en el RentingManager para gestionar errores de negocio y proporcionar mensajes claros. 
-Se modifica con ello el controller también para hacer más sencillo de leer la lógica en caso de excepciones controladas
-Se podría haber hecho uso de excepciones personalizadas del estilo VehicleTooOld o ClientRentalException pero al no ser tan complejo el proyecto creo que es mejor no meterse tan profundo
+La logica reside en el **RentingManager**, donde se validan los requisitos:
+1. **Restriccion por Cliente:** Un cliente no puede reservar mas de un vehiculo simultaneamente.
+2. **Antiguedad de la Flota:** No se permiten vehiculos con mas de 5 años de antiguedad.
 
-Uso del filtro deBusinessExceptionFilter  para dejar mas limipio
-el controlador de try catch
+*Nota:* El ClientId se integra en la entidad Vehicle para simplificar el alcance del ejercicio.
 
-Refactorizamos el controller para eliminar los logger de warning al ser redundantes y usarse en el filter otros logger
+## Decisiones Tecnicas y Refactorizacion
 
-Uso del patron mediatR
-    Se ha implementado el patrón MediatR para manejar las solicitudes y comandos dentro de la aplicación.
-    con esto lo que hacemos es quitar el uso desde el controller del manager directamente, y sea mediante el mediatR que usemos los
-    handlers para gestionar las peticiones.
-    Como se puede observar hemos dividido las llamadas de consulta (Queries) de las acciones post (Commands) para mantener el patrón CQRS, del principio de segregación 
-    de responsabilidad entre consultas y comandos
+### Gestion de Excepciones
+Se ha implementado el **BusinessExceptionFilter** existente. Esto permite lanzar excepciones de dominio sin usar bloques try-catch redundantes, centralizando la respuesta de errores.
 
-Para el logger, podríamos haber hecho uso de Azure applicationInsights, pero para hacerlo correr rápido y sin dependencias lo dejamos tal y como lo hemos puesto, tampoco tenemos suscripción de azure para probarlo
-Como inicialmente tomamos la decisión también de cambiar el telemetry para pintar por logs, conseguimos que el proyecto sea independiente y se pueda ejecutar sin dependencias externas
+### Uso de DTOs y AutoMapper
+Se ha refactorizado el codigo para que el controlador no exponga entidades de dominio. Se hace uso de **VehicleDTO** y **AutoMapper** en la capa del Handler para transformar los datos y proteger la integridad del dominio.
 
-Decisiones técnicas
-Uso de Development al crear la imagen de docker: 
-Se realiza este cambio para evitar que el código de errores en el futuro y para que sea más fácil llevar a cabo la trazabilidad (logs y derivados...)
-Se elimina de swagger el uso de OpenApiVersion porque SwashBuckle en la versión usada no necesita indicar
-de manera explícita ese parámetro, ya que lo maneja internamente.
-Se mantiene en el proyecto MongoDb en caso de que se quisiera hacer un cambio de manipulación de datos en memoria a una bbdd física
-Hemos metido también el uso de VehicleDTO para poder devolver la información en los handler , de tal forma que con ello el controller también lo actualizamos para que en lugar de devolver un Ok vacio 
-podamos devolver la información del object result de lo que se ha manipulado en ese caso
+### Telemetria y Logging
+* **Logging:** Uso de Serilog para registrar eventos en consola.
+* **Telemetria:** Registro de eventos de exito y fallo con detalles tecnicos (ej. motivo del fallo).
 
-Tests
-Se podrían haber creado muchos más tests (ejemplo en rentingMAnager las reglas citadas del enunciado de 5 años de antiguedad o vehiculo ya alquilado), pero 
-he dejado una pincelada de ejemplos de tests, tanto unitarios como infra
-Para los comentarios, siempre que los he creado los he creado con _ para distinguir la acción_condición_quéespera. Por eso lo he metido en el globalSuppressions
-En el caso de infra, se han movido tests unitarios a infra debido a que se utiliza lógica de creación y guardado en bbdd y en esta parte es donde se debería probarlo
+### Docker y Swagger
+* Se ha forzado el modo **Development** en Docker para permitir el acceso a Swagger.
+* Se ha optimizado SwashBuckle eliminando parametros de version manuales.
 
-Para lanzar docker:
-docker build --no-cache --progress=plain -t microservice:latest .
-docker run -d -p 8080:8080 --name gtmotive-app microservice:latest
+## Estrategia de Pruebas (Testing)
 
+Se ha priorizado la calidad sobre la cantidad, proporcionando una base sólida de pruebas que demuestran el enfoque de verificación:
 
+* **Alcance:** Se han implementado ejemplos representativos de tests unitarios y de infraestructura. Aunque el sistema permitiría una cobertura mucho mayor (específicamente en las reglas de validación de 5 años o duplicidad de alquileres en el `RentingManager`), se ha optado por ofrecer una "pincelada" técnica que demuestre el dominio de diferentes tipos de test.
+* **Nomenclatura y Estilo:** Se ha seguido el estándar `Accion_Condicion_ResultadoEsperado` para mejorar la legibilidad. Debido a que el uso de guiones bajos (`_`) en nombres de métodos puede contravenir ciertas reglas de estilo por defecto, se ha incluido una configuración específica en el archivo **GlobalSuppressions** para permitir este formato descriptivo.
+* **Tests de Infraestructura:** He tomado la decisión de mover ciertos tests unitarios al proyecto de Infraestructura. El motivo es que estos tests validan la lógica de creación y persistencia en la base de datos (aunque sea en memoria), y arquitectónicamente es el lugar donde debe verificarse que el estado del repositorio y el contexto de datos se comportan como se espera.
+
+## Instrucciones de Ejecucion
+
+Para construir y desplegar el contenedor:
+
+```bash
+docker build --no-cache -t gtmotive-app .
+docker run -d -p 8080:8080 --name gtmotive-container gtmotive-app
+```
+
+Swagger disponible en: http://localhost:8080/swagger
+
+## Autor y Repo
+
+* Fernando Arribas Ramirez - [nandoarribas](https://github.com/nandoarribas/gt-prueba/

@@ -61,7 +61,7 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         /// <response code="400">If the business rules are violated (e.g., vehicle unavailable or client already has a rental).</response>
         /// <response code="500">If an unexpected internal error occurs.</response>
         [HttpPost("rent")]
-        [ProducesResponseType(typeof(VehicleDto), StatusCodes.Status200OK)] // Añadimos el Type aquí
+        [ProducesResponseType(typeof(VehicleDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Rent([FromBody] RentVehicleCommand command)
