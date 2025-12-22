@@ -57,6 +57,6 @@ Se podrían haber creado muchos más tests (ejemplo en rentingMAnager las reglas
 he dejado una pincelada de ejemplos de tests, tanto unitarios como infra
 En el caso de infra, se han movido tests unitarios a infra debido a que se utiliza lógica de creación y guardado en bbdd y en esta parte es donde se debería probarlo
 
-Para el test funcional se utiliza el tipo Unit para permitir que los comandos que no devuelven datos sean compatibles con la infraestructura genérica de MediatR y de los tests. 
-En vez de void, Unit es un tipo que permite todas las peticiones de forma homogénea bajo la interfaz IRequestHandler<TRequest, TResponse>, facilitando la automatización de los Scopes y la inyección de dependencias.
+Hemos metido también el uso de VehicleDTO para poder devolver la información en los handler , de tal forma que con ello el controller también lo actualizamos para que en lugar de devolver un Ok vacio 
+podamos devolver la información del object result de lo que se ha manipulado en ese caso
 
