@@ -74,7 +74,7 @@ namespace GtMotive.Estimate.Microservice.Api.UseCases
         /// <summary>
         /// Processes the return of a rented vehicle with the specified identifier.
         /// </summary>
-        /// <param name="command">The return request details containing Vehicle ID and Client ID.</param>
+        /// <param name="command">The return request details containing Vehicle ID.</param>
         /// <returns>A <see cref="VehicleDto"/> with the updated rental state and confirmation message.</returns>
         /// <response code="200">Returns a success message when the vehicle is successfully returned.</response>
         /// <response code="400">Returned if the vehicle is not found or is not currently rented (Business Rule Violation).</response>

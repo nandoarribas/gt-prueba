@@ -49,14 +49,17 @@ Uso de Development al crear la imagen de docker:
 Se realiza este cambio para evitar que el código de errores en el futuro y para que sea más fácil llevar a cabo la trazabilidad (logs y derivados...)
 Se elimina de swagger el uso de OpenApiVersion porque SwashBuckle en la versión usada no necesita indicar
 de manera explícita ese parámetro, ya que lo maneja internamente.
-Por falta de tiempo se me pasó la creación de un DTO para la extracción de información del vehiculo de Repositorio, para evitar pasar información sensible 
-en caso de que la tuviera desde la MemoryDB al usuario (imagina que hay in VIN o cosas asi que no serían necesarias para mostrar...)
+Se mantiene en el proyecto MongoDb en caso de que se quisiera hacer un cambio de manipulación de datos en memoria a una bbdd física
+Hemos metido también el uso de VehicleDTO para poder devolver la información en los handler , de tal forma que con ello el controller también lo actualizamos para que en lugar de devolver un Ok vacio 
+podamos devolver la información del object result de lo que se ha manipulado en ese caso
 
 Tests
 Se podrían haber creado muchos más tests (ejemplo en rentingMAnager las reglas citadas del enunciado de 5 años de antiguedad o vehiculo ya alquilado), pero 
 he dejado una pincelada de ejemplos de tests, tanto unitarios como infra
 En el caso de infra, se han movido tests unitarios a infra debido a que se utiliza lógica de creación y guardado en bbdd y en esta parte es donde se debería probarlo
 
-Para el test funcional se utiliza el tipo Unit para permitir que los comandos que no devuelven datos sean compatibles con la infraestructura genérica de MediatR y de los tests. 
-En vez de void, Unit es un tipo que permite todas las peticiones de forma homogénea bajo la interfaz IRequestHandler<TRequest, TResponse>, facilitando la automatización de los Scopes y la inyección de dependencias.
+Para lanzar docker:
+docker build --no-cache --progress=plain -t microservice:latest .
+docker run -d -p 8080:8080 --name gtmotive-app microservice:latest
+
 
